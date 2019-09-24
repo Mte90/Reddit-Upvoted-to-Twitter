@@ -1,6 +1,7 @@
 #! /usr/bin/python3
 import praw
 import os
+import json
 
 reddit = praw.Reddit('mte90')
 
@@ -11,12 +12,15 @@ user = reddit.redditor('mte90')
 posts = {}
 
 if os.path.exists('./posts.json'):
-    f = open("./posts.json", "r")
-    posts = f.read()
+    print("File JSON found")
+    with open('./posts.json') as json_file:
+        posts = json.load(json_file)
 
 for post in user.upvoted(limit=100):
-    print(post.id)
-    posts[post.id].append({'title': post.title, 'subreddit': str(post.subreddit).lower()})
-#    print(post.title + ' - ' + str(post.subreddit) + ' - ' + post.id + ' - ' + post.permalink)
+    if post.id not in posts:
+        posts[post.id] = {'title': post.title, 'subreddit': str(post.subreddit).lower(), 'permalink': post.permalink}
+        print("Missing " + post.id + " post")
 
-print(posts)
+with open('posts.json', 'w') as outfile:
+    print("JSON saved")
+    json.dump(posts, outfile, indent=4)
