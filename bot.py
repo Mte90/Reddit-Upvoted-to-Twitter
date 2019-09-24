@@ -33,7 +33,7 @@ auth.set_access_token(str(tweepy_config.get('tweepy', 'access_token')), str(twee
 api = tweepy.API(auth)
 
 if os.path.exists('./posts.json'):
-    print("File JSON found")
+    print("File posts found")
     with open('./posts.json') as json_file:
         posts = json.load(json_file)
 
@@ -42,19 +42,19 @@ excludes = excludes.split(',')
 
 for post in user.upvoted(limit=100):
     if post.id not in posts:
-        tweet_it = False
+        tweet_it = True
         posts[post.id] = {'title': post.title, 'subreddit': str(post.subreddit).lower(), 'permalink': post.permalink}
         print("Missing " + post.id + " post")
         
         for exclude in excludes:
-            if exclude.lower() is str(post.subreddit).lower():
-                tweet_it = True
+            if exclude.lower() == str(post.subreddit).lower():
+                tweet_it = False
                 break
         
         if tweet_it:
             # Create a tweet
-            #api.update_status(post.title + ' via /r/' + str(post.subreddit) + "\nhttps://www.reddit.com" + post.permalink)
+            api.update_status(post.title + ' via /r/' + str(post.subreddit) + "\nhttps://www.reddit.com" + post.permalink)
 
 with open('posts.json', 'w') as outfile:
-    print("JSON saved")
+    print("Posts saved")
     json.dump(posts, outfile, indent=4)
