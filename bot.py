@@ -2,24 +2,58 @@
 import praw
 import os
 import json
+import tweepy
+import configparser
 
-reddit = praw.Reddit('mte90')
+# Load custom settings from PRAW official file
+if os.path.exists('./praw.ini'):
+    praw_config = configparser.RawConfigParser()
+    praw_config.read_file(open('./praw.ini'))
+
+reddit = praw.Reddit(str(praw_config.get('user', 'nickname')))
 
 print("Logged in as: " + str(reddit.user.me()))
 print()
 
-user = reddit.redditor('mte90')
+user = reddit.redditor(str(praw_config.get('user', 'nickname')))
 posts = {}
+
+# Load settings for tweepy 
+if os.path.exists('./tweepy.ini'):
+    tweepy_config = configparser.RawConfigParser()
+    tweepy_config.read_file(open('./tweepy.ini'))
+else:
+    print('tweepy.ini missing')
+
+# Authenticate to Twitter
+auth = tweepy.OAuthHandler(str(tweepy_config.get('tweepy', 'consumer_key')), str(tweepy_config.get('tweepy', 'consumer_secret')))
+auth.set_access_token(str(tweepy_config.get('tweepy', 'access_token')), str(tweepy_config.get('tweepy', 'access_secret')))
+
+# Create API object
+api = tweepy.API(auth)
 
 if os.path.exists('./posts.json'):
     print("File JSON found")
     with open('./posts.json') as json_file:
         posts = json.load(json_file)
 
+excludes = str(praw_config.get('user', 'exclude'))
+excludes = excludes.split(',')
+
 for post in user.upvoted(limit=100):
     if post.id not in posts:
+        tweet_it = False
         posts[post.id] = {'title': post.title, 'subreddit': str(post.subreddit).lower(), 'permalink': post.permalink}
         print("Missing " + post.id + " post")
+        
+        for exclude in excludes:
+            if exclude.lower() is str(post.subreddit).lower():
+                tweet_it = True
+                break
+        
+        if tweet_it:
+            # Create a tweet
+            #api.update_status(post.title + ' via /r/' + str(post.subreddit) + "\nhttps://www.reddit.com" + post.permalink)
 
 with open('posts.json', 'w') as outfile:
     print("JSON saved")
