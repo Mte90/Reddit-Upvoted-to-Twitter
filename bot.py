@@ -54,10 +54,12 @@ for post in user.upvoted(limit=100):
 
         if tweet_it:
             # Wait 10 minutes before tweet it
-            time.sleep(600)
+            time.sleep(10)
             # Create a tweet
+            print('Posting new tweet')
             api.update_status(post.title + ' via /r/' + str(post.subreddit) + "\nhttps://www.reddit.com" + post.permalink)
 
+print()
 with open('posts.json', 'w') as outfile:
     print("Posts saved")
     json.dump(posts, outfile, indent=4)
