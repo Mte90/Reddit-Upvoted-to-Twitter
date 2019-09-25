@@ -1,7 +1,8 @@
 #! /usr/bin/python3
-import praw
 import os
 import json
+import praw
+import time
 import tweepy
 import configparser
 
@@ -18,7 +19,7 @@ print()
 user = reddit.redditor(str(praw_config.get('user', 'nickname')))
 posts = {}
 
-# Load settings for tweepy 
+# Load settings for tweepy
 if os.path.exists('./tweepy.ini'):
     tweepy_config = configparser.RawConfigParser()
     tweepy_config.read_file(open('./tweepy.ini'))
@@ -45,13 +46,15 @@ for post in user.upvoted(limit=100):
         tweet_it = True
         posts[post.id] = {'title': post.title, 'subreddit': str(post.subreddit).lower(), 'permalink': post.permalink}
         print("Missing " + post.id + " post")
-        
+
         for exclude in excludes:
             if exclude.lower() == str(post.subreddit).lower():
                 tweet_it = False
                 break
-        
+
         if tweet_it:
+            # Wait 10 minutes before tweet it
+            time.sleep(600)
             # Create a tweet
             api.update_status(post.title + ' via /r/' + str(post.subreddit) + "\nhttps://www.reddit.com" + post.permalink)
 
