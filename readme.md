@@ -8,7 +8,7 @@ The idea is to share on Twitter the upvoted post but excluding posts from specif
 
 ## Install
 
-Copy `praw-sample.ini` and `tweeepy-sample.ini` and put your settings.  
+Copy `praw-sample.ini` and `tweepy-sample.ini` and put your settings.  
 Require a Twitter and Reddit app with their token in the config files.
 
 ## How works
