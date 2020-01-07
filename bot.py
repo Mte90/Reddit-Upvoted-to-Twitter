@@ -10,6 +10,11 @@ import configparser
 if os.path.exists('./praw.ini'):
     praw_config = configparser.RawConfigParser()
     praw_config.read_file(open('./praw.ini'))
+    
+def save_tweets(posts):
+    with open('posts.json', 'w') as outfile:
+        print("\nPost saved")
+        json.dump(posts, outfile, indent=4)
 
 reddit = praw.Reddit(str(praw_config.get('user', 'nickname')))
 
@@ -37,6 +42,7 @@ if os.path.exists('./posts.json'):
     print("File posts found")
     with open('./posts.json') as json_file:
         posts = json.load(json_file)
+        print("Posts item: " + str(len(posts)))
 
 excludes = str(praw_config.get('user', 'exclude'))
 excludes = excludes.split(',')
@@ -44,7 +50,6 @@ excludes = excludes.split(',')
 for post in user.upvoted(limit=100):
     if post.id not in posts:
         tweet_it = True
-        posts[post.id] = {'title': post.title, 'subreddit': str(post.subreddit).lower(), 'permalink': post.permalink}
         print("Missing " + post.id + " post")
 
         for exclude in excludes:
@@ -53,13 +58,10 @@ for post in user.upvoted(limit=100):
                 break
 
         if tweet_it:
-            # Wait 10 minutes before tweet it
-            time.sleep(600)
+            posts[post.id] = {'title': post.title, 'subreddit': str(post.subreddit).lower(), 'permalink': post.permalink}
             # Create a tweet
             print('Posting new tweet')
+            save_tweets(posts)
             api.update_status(post.title + ' via /r/' + str(post.subreddit) + "\nhttps://www.reddit.com" + post.permalink)
-
-print()
-with open('posts.json', 'w') as outfile:
-    print("Posts saved")
-    json.dump(posts, outfile, indent=4)
+            # Wait 10 minutes before tweet it
+            time.sleep(600)
