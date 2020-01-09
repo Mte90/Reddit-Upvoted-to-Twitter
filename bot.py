@@ -10,7 +10,7 @@ import configparser
 if os.path.exists('./praw.ini'):
     praw_config = configparser.RawConfigParser()
     praw_config.read_file(open('./praw.ini'))
-    
+
 def save_tweets(posts):
     with open('posts.json', 'w') as outfile:
         print("\nPost saved")
