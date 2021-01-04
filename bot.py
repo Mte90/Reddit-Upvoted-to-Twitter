@@ -57,6 +57,11 @@ for post in user.upvoted(limit=100):
                 tweet_it = False
                 break
 
+        if 'crosspost_parent_list' in vars(post):
+            if str(post.author.name).lower() == praw_config.get('user', 'nickname'):
+                print("Crosspost of the user that is also the author, avoid publishing - ignored")
+                tweet_it = False
+
         if tweet_it:
             posts[post.id] = {'title': post.title, 'subreddit': str(post.subreddit).lower(), 'permalink': post.permalink}
             # Create a tweet
