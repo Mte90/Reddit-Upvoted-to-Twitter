@@ -32,11 +32,7 @@ else:
     print('tweepy.ini missing')
 
 # Authenticate to Twitter
-auth = tweepy.OAuthHandler(str(tweepy_config.get('tweepy', 'consumer_key')), str(tweepy_config.get('tweepy', 'consumer_secret')))
-auth.set_access_token(str(tweepy_config.get('tweepy', 'access_token')), str(tweepy_config.get('tweepy', 'access_secret')))
-
-# Create API object
-api = tweepy.API(auth)
+api = tweepy.Client(consumer_key=str(tweepy_config.get('tweepy', 'consumer_key')),consumer_secret=str(tweepy_config.get('tweepy', 'consumer_secret')),access_token=str(tweepy_config.get('tweepy', 'access_token')),access_token_secret=str(tweepy_config.get('tweepy', 'access_secret')))
 
 if os.path.exists('./posts.json'):
     print("File posts found")
@@ -70,6 +66,9 @@ for post in user.upvoted(limit=100):
             # Create a tweet
             print('Posting new tweet')
             save_tweets(posts)
-            api.update_status(post.title + ' via /r/' + str(post.subreddit) + "\nhttps://www.reddit.com" + post.permalink)
+            try:
+                api.create_tweet(text=post.title + ' via /r/' + str(post.subreddit) + "\nhttps://www.reddit.com" + post.permalink)
+            except:
+                print('Error from Twitter API')
             # Wait 10 minutes before tweet it
             time.sleep(600)
